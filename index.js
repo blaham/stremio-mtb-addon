@@ -1,3 +1,4 @@
+console.log("🛠 index.js se spustil");
 require("dotenv").config();
 const { addonBuilder } = require("stremio-addon-sdk");
 const axios = require("axios");
@@ -9,7 +10,7 @@ if (!WST) {
     console.error("❌ Token není definován. Spusť nejdřív get_token.py");
     process.exit(1);
 }
-
+console.log("🛠 nespadlo to na token");
 const manifest = {
     id: "community.webshare",
     version: "1.0.0",

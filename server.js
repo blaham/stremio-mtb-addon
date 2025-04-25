@@ -1,3 +1,5 @@
+console.log("🛠 server.js se spustil");
+
 const express = require("express");
 const app = express();
 const addonInterface = require("./index");
