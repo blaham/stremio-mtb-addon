@@ -1,25 +1,34 @@
-console.log("🛠 server.js se spustil");
-
 const express = require("express");
 const app = express();
 const addonInterface = require("./index");
 
 const PORT = process.env.PORT || 7000;
-setInterval(() => {
-  console.log("💓 server alive");
-}, 15000);
-app.get("/manifest.json", (req, res) => {
-    res.send(addonInterface.manifest);
+
+// Přidej ping logy, ať vidíme požadavky
+app.use((req, res, next) => {
+    console.log(`📡 Přijat požadavek: ${req.method} ${req.url}`);
+    next();
+});
+
+// Manifest musí být získaný pomocí addonInterface.get
+app.get("/manifest.json", async (req, res) => {
+    try {
+        const response = await addonInterface.get("manifest");
+        res.json(response);
+    } catch (err) {
+        console.error("❌ Chyba při získávání manifestu:", err);
+        res.status(500).send("Chyba serveru");
+    }
 });
 
 app.get("/:resource/:type/:id.json", async (req, res) => {
     try {
         const response = await addonInterface.get(req.params.resource, req.params.type, req.params.id);
-        if (!response) return res.status(404).send("Not found");
-        res.send(response);
+        if (!response) return res.status(404).send("Nenalezeno");
+        res.json(response);
     } catch (err) {
-        console.error("❌ Chyba v routě /:resource/:type/:id.json", err);
-        res.status(500).send("Internal Server Error");
+        console.error("❌ Chyba při získávání resource:", err);
+        res.status(500).send("Chyba serveru");
     }
 });
 
