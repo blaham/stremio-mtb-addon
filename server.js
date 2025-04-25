@@ -1,37 +1,31 @@
 const express = require("express");
-const app = express();
 const addonInterface = require("./index");
-
+const app = express();
 const PORT = process.env.PORT || 7000;
 
-// Přidej ping logy, ať vidíme požadavky
+app.use(express.json());
 app.use((req, res, next) => {
-    console.log(`📡 Přijat požadavek: ${req.method} ${req.url}`);
-    next();
+  console.log(`📡 ${req.method} ${req.url}`);
+  next();
 });
 
-// Manifest musí být získaný pomocí addonInterface.get
-app.get("/manifest.json", async (req, res) => {
-    try {
-        const response = await addonInterface.get("manifest");
-        res.json(response);
-    } catch (err) {
-        console.error("❌ Chyba při získávání manifestu:", err);
-        res.status(500).send("Chyba serveru");
-    }
+app.get("/manifest.json", (req, res) => {
+  res.json(addonInterface.get("manifest"));
 });
 
-app.get("/:resource/:type/:id.json", async (req, res) => {
-    try {
-        const response = await addonInterface.get(req.params.resource, req.params.type, req.params.id);
-        if (!response) return res.status(404).send("Nenalezeno");
-        res.json(response);
-    } catch (err) {
-        console.error("❌ Chyba při získávání resource:", err);
-        res.status(500).send("Chyba serveru");
-    }
+app.get("/:resource/:type/:id.json", (req, res) => {
+  const { resource, type, id } = req.params;
+  addonInterface.get(resource, type, id)
+    .then(response => {
+      if (!response) return res.status(404).send("Nenalezeno");
+      res.json(response);
+    })
+    .catch(err => {
+      console.error(`❌ Chyba při získávání ${resource}/${type}/${id}:`, err);
+      res.status(500).send("Chyba serveru");
+    });
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Addon běží na portu ${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Addon běží na portu ${PORT}`);
 });
