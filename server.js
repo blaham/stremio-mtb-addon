@@ -5,7 +5,9 @@ const app = express();
 const addonInterface = require("./index");
 
 const PORT = process.env.PORT || 7000;
-
+setInterval(() => {
+  console.log("💓 server alive");
+}, 15000);
 app.get("/manifest.json", (req, res) => {
     res.send(addonInterface.manifest);
 });
